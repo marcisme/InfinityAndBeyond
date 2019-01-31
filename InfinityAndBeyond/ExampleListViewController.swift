@@ -9,46 +9,44 @@
 import UIKit
 
 class ExampleListViewController: UITableViewController {
+    enum Example: Int, CaseIterable {
+        case countPlusOne
 
-  enum Example: Int, CaseIterable {
-    case countPlusOne
+        var name: String {
+            switch self {
+            case .countPlusOne:
+                return "Count + 1"
+            }
+        }
 
-    var name: String {
-      switch self {
-      case .countPlusOne:
-        return "Count + 1"
-      }
+        func newViewController() -> UIViewController {
+            let vc: UIViewController
+            switch self {
+            case .countPlusOne:
+                vc = CountPlusOneViewController()
+            }
+            vc.navigationItem.title = name
+            return vc
+        }
     }
 
-    func newViewController() -> UIViewController {
-      let vc: UIViewController
-      switch self {
-      case .countPlusOne:
-        vc = CountPlusOneViewController()
-      }
-      vc.navigationItem.title = name
-      return vc
+    // MARK: - UITableViewDataSource
+
+    override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        return Example.allCases.count
     }
-  }
 
-  // MARK: - UITableViewDataSource
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ExampleCell")!
+        let example = Example(rawValue: indexPath.row)!
+        cell.textLabel?.text = example.name
+        return cell
+    }
 
-  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return Example.allCases.count
-  }
+    // MARK: - UITableViewDelegate
 
-  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "ExampleCell")!
-    let example = Example(rawValue: indexPath.row)!
-    cell.textLabel?.text = example.name
-    return cell
-  }
-
-  // MARK: - UITableViewDelegate
-
-  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    let example = Example(rawValue: indexPath.row)!
-    navigationController?.pushViewController(example.newViewController(), animated: true)
-  }
-
+    override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let example = Example(rawValue: indexPath.row)!
+        navigationController?.pushViewController(example.newViewController(), animated: true)
+    }
 }
