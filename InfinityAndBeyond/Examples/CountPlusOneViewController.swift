@@ -150,13 +150,19 @@ class CountPlusOneViewController: UITableViewController {
         // set the loading state, so everything else behaves correctly while the request is pending
         state = .loading
         // request the next batch of data
-        networkClient.fetch(offset: models.count, limit: batchSize) { response in
+        let nextRange = models.count ..< models.count + batchSize
+        networkClient.fetch(offset: nextRange.lowerBound, limit: nextRange.count) { response in
             // update the model/UI and set the state based on the type of response
             switch response {
-            case let .success(models):
-                self.models.append(contentsOf: models)
+            case let .success(newModels):
+                self.models.append(contentsOf: newModels)
                 self.state = .loaded
-                self.tableView.reloadData()
+                if self.models.count > nextRange.count {
+                    let insertedIndexPaths = nextRange.map { IndexPath(row: $0, section: 0) }
+                    self.tableView.insertRows(at: insertedIndexPaths, with: .none)
+                } else {
+                    self.tableView.reloadData()
+                }
             case .failure:
                 self.state = .error
                 self.configureLastRow(for: .error)
