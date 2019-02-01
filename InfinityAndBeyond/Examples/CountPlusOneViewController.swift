@@ -155,18 +155,24 @@ class CountPlusOneViewController: UITableViewController {
             // update the model/UI and set the state based on the type of response
             switch response {
             case let .success(newModels):
-                self.models.append(contentsOf: newModels)
+                self.insert(newModels: newModels, for: nextRange)
                 self.state = .loaded
-                if self.models.count > nextRange.count {
-                    let insertedIndexPaths = nextRange.map { IndexPath(row: $0, section: 0) }
-                    self.tableView.insertRows(at: insertedIndexPaths, with: .none)
-                } else {
-                    self.tableView.reloadData()
-                }
             case .failure:
-                self.state = .error
                 self.configureLastRow(for: .error)
+                self.state = .error
             }
+        }
+    }
+
+    private func insert(newModels: [Model], for range: Range<Int>) {
+        models.append(contentsOf: newModels)
+        if models.count > range.count {
+            // insert rows to avoid moving scroll position or any visual changes with existing rows
+            let insertedIndexPaths = range.map { IndexPath(row: $0, section: 0) }
+            tableView.insertRows(at: insertedIndexPaths, with: .none)
+        } else {
+            // otherwise this is the first bach and reloading the whole table looks better
+            tableView.reloadData()
         }
     }
 
